@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ResuMatch — Find Your Perfect Job</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/style.css" />
+</head>
+<body>
+  <!-- ── NAV ─────────────────────────────────────────────────── -->
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">ResuMatch</span>
+      </div>
+      <div id="embeddingBadge" class="nav-badge">AI-Powered Matching</div>
+      <a href="/how-it-works" style="font-size:.82rem;color:var(--muted);text-decoration:none;border:1px solid var(--border2);padding:.35rem .85rem;border-radius:8px;transition:color .2s,border-color .2s;white-space:nowrap" onmouseover="this.style.color='var(--text)';this.style.borderColor='var(--accent)'" onmouseout="this.style.color='var(--muted)';this.style.borderColor='var(--border2)'">How it works →</a>
+    </div>
+  </nav>
+
+  <!-- ── HERO ─────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="grid-overlay"></div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-tag">
+        <span class="tag-dot"></span>
+        Powered by TF-IDF &amp; Semantic Matching
+      </div>
+      <h1 class="hero-title">
+        Upload your resume.<br />
+        <span class="gradient-text">Discover your fit.</span>
+      </h1>
+      <p class="hero-subtitle">
+        Our AI analyzes your skills and experience to match you against
+        32+ curated job roles — ranked by fit score.
+      </p>
+
+      <!-- ── UPLOAD ZONE ───────────────────────────────────────── -->
+      <div class="upload-card" id="uploadCard">
+        <div class="upload-zone" id="dropZone">
+          <div class="upload-icon-wrap">
+            <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+              <path d="M20 28V12M20 12L13 19M20 12L27 19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M8 30h24" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <p class="upload-primary">Drop your resume here</p>
+          <p class="upload-secondary">PDF, DOCX, or TXT &nbsp;·&nbsp; up to 10MB</p>
+          <label class="btn-upload" for="fileInput">Choose File</label>
+          <input type="file" id="fileInput" accept=".pdf,.docx,.doc,.txt" hidden />
+        </div>
+
+        <!-- OR divider + text input -->
+        <div class="or-divider"><span>or paste your resume text</span></div>
+
+        <div class="text-input-wrap">
+          <textarea
+            id="resumeText"
+            placeholder="Paste your resume content here…&#10;&#10;Example:&#10;Software Engineer with 5 years of experience in Python, React, AWS…&#10;Skills: Python, React, Node.js, PostgreSQL, Docker, Agile…"
+            rows="6"
+          ></textarea>
+        </div>
+
+        <button class="btn-primary" id="analyzeBtn" onclick="analyzeResume()">
+          <span class="btn-text">Analyze Resume</span>
+          <span class="btn-arrow">→</span>
+        </button>
+
+        <p class="upload-hint">Your resume stays in your browser — never stored.</p>
+      </div>
+    </div>
+
+    <!-- Stats strip -->
+    <div class="stats-strip">
+      <div class="stat"><span class="stat-num" id="statJobs">32</span><span class="stat-label">Job Roles</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num" id="statIndustries">10+</span><span class="stat-label">Industries</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">100+</span><span class="stat-label">Skills Tracked</span></div>
+      <div class="stat-divider"></div>
+      <div class="stat"><span class="stat-num">&#x3C;1s</span><span class="stat-label">Match Time</span></div>
+    </div>
+  </section>
+
+  <!-- ── LOADING ───────────────────────────────────────────────── -->
+  <div class="loading-overlay" id="loadingOverlay" hidden>
+    <div class="loading-card">
+      <div class="spinner">
+        <div class="spinner-ring"></div>
+        <span class="spinner-icon">⬡</span>
+      </div>
+      <p class="loading-title">Analyzing your resume…</p>
+      <div class="loading-steps">
+        <div class="loading-step active" id="step1">📄 Extracting &amp; preprocessing text</div>
+        <div class="loading-step" id="step2">🧠 NLTK tokenise → lemmatise → stem</div>
+        <div class="loading-step" id="step3">🔍 TF-IDF + Embedding similarity</div>
+        <div class="loading-step" id="step4">✅ Ranking results</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── RESULTS ──────────────────────────────────────────────── -->
+  <section class="results-section" id="resultsSection" hidden>
+    <div class="results-inner">
+
+      <!-- Resume summary -->
+      <div class="resume-summary" id="resumeSummary"></div>
+
+      <!-- Section header -->
+      <div class="results-header">
+        <div>
+          <h2 class="results-title">Your Top Job Matches</h2>
+          <p class="results-subtitle" id="resultsSubtitle"></p>
+        </div>
+        <div class="results-controls">
+          <button class="btn-ghost" onclick="resetApp()">← New Analysis</button>
+          <div class="filter-wrap">
+            <label class="filter-label">Filter:</label>
+            <select id="categoryFilter" onchange="filterResults()">
+              <option value="">All Categories</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Job cards grid -->
+      <div class="jobs-grid" id="jobsGrid"></div>
+    </div>
+  </section>
+
+  <!-- ── JOB DETAIL MODAL ──────────────────────────────────────── -->
+  <div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+    <div class="modal" id="jobModal">
+      <button class="modal-close" onclick="closeModal()">✕</button>
+      <div id="modalContent"></div>
+    </div>
+  </div>
+
+  <!-- ── DATASET BANNER ──────────────────────────────────────────── -->
+  <div class="dataset-banner" id="datasetBanner">
+    <span class="dataset-icon">📦</span>
+    <div class="dataset-text">
+      <span class="dataset-source" id="datasetSource">Built-in dataset (32 jobs)</span>
+      <span class="dataset-sub" id="datasetSub">Place postings.csv in data/linkedin/ for 5,000+ real LinkedIn jobs</span>
+    </div>
+    <a href="/explain" target="_blank" class="btn-explain">🧠 How BERT works →</a>
+  </div>
+
+  <!-- ── FOOTER ──────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="logo">
+        <span class="logo-icon">⬡</span>
+        <span class="logo-text">ResuMatch</span>
+      </div>
+      <p class="footer-text">
+        Built with Python, Flask, TF-IDF &amp; Cosine Similarity.
+        Dataset of 32 curated job roles across 10+ industries.
+      </p>
+    </div>
+  </footer>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
