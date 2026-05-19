@@ -1,6 +1,6 @@
 # ── Core web framework ────────────────────────────────────────────
 flask>=2.3.0
-gunicorn>=21.2.0git --version
+gunicorn>=21.2.0
 
 # ── NLP / ML ──────────────────────────────────────────────────────
 nltk>=3.8.0                  # tokenisation, stopwords, stemming, lemmatisation
